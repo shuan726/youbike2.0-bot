@@ -23,7 +23,7 @@ def index(requests):
 @csrf_exempt
 def callback(request):
     keywords = {'words': ['哪條街或周邊景點呢？', '請您輸入地址or景點！！',
-                          '越詳細地址越好唷(我只能找前五個QQ)，前面不用加台北市唷～', '快給我地址!要不然怎麼幫你找？？？', '地址的英文是address，但我看不懂英文地址唷～'],
+                          '越詳細地址越好唷(我只能找前五個QQ)，前面不用加台北市唷～', '快給我地址!要不然怎麼幫你找？？？', '今天想要減肥嗎，來騎ubike減肥吧！！'],
                 'area': [
                     '中山區，中正區，信義區，內湖區，北投區，南港區，士林區，大同區，大安區，文山區，松山區，臺大公館校區，臺大專區，萬華區', '想要找哪個區域呢？？']
                 }
@@ -93,9 +93,10 @@ def callback(request):
                         sendText(message, event)
                         ntu()
                     elif '臺大公館校區' in text or '公館校區' in text:
-                        message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        ntu_gongguan()
+                        send_data = ntu_gongguan()
+                        messages = LocationSendMessage(
+                            send_data[0][0], send_data[0][1], send_data[0][2], send_data[0][3]), TextSendMessage(f'更新時間：{send_data[0][6]} 目前車輛數量：{send_data[0][4]} 空位數量：{send_data[0][5]}')
+                        line_bot_api.reply_message(event.reply_token, messages)
                     elif text == '萬華區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
