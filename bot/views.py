@@ -60,6 +60,10 @@ def callback(request):
                         message = random.choice(keywords['words'])
                         sendText(message, event)
                         xinyi()
+                    elif text == '內湖區':
+                        message = random.choice(keywords['words'])
+                        sendText(message, event)
+                        neihu()
                     elif text == '北投區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
