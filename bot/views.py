@@ -22,8 +22,8 @@ def index(requests):
 
 @csrf_exempt
 def callback(request):
-    keywords = {'words': ['哪條街或周邊景點呢？', '請您輸入地址or景點！！',
-                          '越詳細地址越好唷(我只能找前五個QQ)，前面不用加台北市唷～', '快給我地址!要不然怎麼幫你找？？？', '今天想要減肥嗎，來騎ubike減肥吧！！'],
+    keywords = {'words': ['哪條街或周邊景點呢？', '再請您輸入地址or景點！！',
+                          '越詳細地址越好唷(我只能找前五個QQ)，前面不用加台北市唷～', '快給我地址!要不然怎麼幫你找？？？', '今天想要減肥嗎，來騎ubike吧！！'],
                 'area': [
                     '中山區，中正區，信義區，內湖區，北投區，南港區，士林區，大同區，大安區，文山區，松山區，臺大公館校區，臺大專區，萬華區', '想要找哪個區域呢？？']
                 }
@@ -43,7 +43,7 @@ def callback(request):
                     text = event.message.text
                     if '使用' in text or '說明' in text:
                         sendText(
-                            '歡迎使用"台北市" ubike bot！欲查找站點請先輸入區域(輸入區域即可查看)，要不然會找不到資料唷，最後再輸入欲查找站點，感謝您的使用！！', event)
+                            '歡迎使用"台北市" ubike bot！\n查找規則:\n欲查找站點請先輸入區域(輸入區域即可查看)，再輸入欲查找站點即可\n感謝您的使用！！', event)
                     elif '區域' in text:
                         messages = [TextSendMessage(text)
                                     for text in keywords['area']]
@@ -304,19 +304,19 @@ def ai(text, event, line_bot_api):
                 messages = (TextSendMessage('您所找的地方/景點未搜尋到，請確認後再重新輸入！'))
             elif len(data2) == 1:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
             elif len(data2) == 2:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
-                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'更新時間：{data2[1][6]} 目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}')
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n 更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}')
             elif len(data2) == 3:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
-                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'更新時間：{data2[1][6]} 目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}'), LocationSendMessage(
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n 更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}'), LocationSendMessage(
                     data2[2][0], data2[2][1], data2[2][2], data2[2][3])
             elif len(data2) >= 4:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
                     data2[1][0], data2[1][1], data2[1][2], data2[1][3]), LocationSendMessage(
                     data2[2][0], data2[2][1], data2[2][2], data2[2][3]), LocationSendMessage(
                     data2[3][0], data2[3][1], data2[3][2], data2[3][3])
