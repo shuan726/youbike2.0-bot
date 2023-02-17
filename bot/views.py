@@ -22,11 +22,10 @@ def index(requests):
 
 @csrf_exempt
 def callback(request):
-    global send_data
-    keywords = {'words': ['哪條路或周邊景點呢？', '請您輸入地址or景點！！',
+    keywords = {'words': ['哪條街或周邊景點呢？', '請您輸入地址or景點！！',
                           '越詳細地址越好唷(我只能找前五個QQ)，前面不用加台北市唷～', '快給我地址!要不然怎麼幫你找？？？', '地址的英文是address，但我看不懂英文地址唷～'],
                 'area': [
-                    '中山區，中正區，信義區，內湖區，北投區，南港區，士林區，大同區，大安區，文山區，松山區，臺大公館校區，臺大專區，萬華區', '想要找什麼區域呢？？']
+                    '中山區，中正區，信義區，內湖區，北投區，南港區，士林區，大同區，大安區，文山區，松山區，臺大公館校區，臺大專區，萬華區', '想要找哪個區域呢？？']
                 }
 
     if request.method == 'POST':
@@ -42,63 +41,67 @@ def callback(request):
             if isinstance(event, MessageEvent):
                 if isinstance(event.message, TextMessage):
                     text = event.message.text
-                    if '區域' in text:
+                    if '使用說明' in text:
+                        sendText(
+                            '歡迎使用ubike bot！欲查找站點請先輸入區域(輸入區域即可查看)，要不然會找不到資料唷，最後再輸入欲查找站點，感謝您的使用！！', event)
+                    elif '區域' in text:
                         messages = [TextSendMessage(text)
                                     for text in keywords['area']]
                         line_bot_api.reply_message(event.reply_token, messages)
                     elif text == '中山區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = zhongshan()
+                        zhongshan()
                     elif text == '中正區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = zhongzheng()
+                        zhongzheng()
                     elif text == '信義區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = xinyi()
+                        xinyi()
                     elif text == '北投區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = beitou()
+                        beitou()
                     elif text == '南港區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = nangang()
+                        nangang()
                     elif text == '士林區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = shilin()
+                        shilin()
                     elif text == '大同區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = datong()
+                        datong()
                     elif text == '大安區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = daan()
+                        daan()
                     elif text == '文山區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = wenshan()
+                        wenshan()
                     elif text == '松山區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = songshan()
-                    elif '臺大' in text or '台大' in text:
+                        songshan()
+                    elif '臺大專區' in text or '台大專區' in text or text == '臺大專區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = ntu()
-                        if '公館' in text:
-                            message = random.choice(keywords['words'])
-                            sendText(message, event)
-                            send_data = ntu_gongguan()
+                        ntu()
+                    elif '臺大公館校區' in text or '公館校區' in text:
+                        message = random.choice(keywords['words'])
+                        sendText(message, event)
+                        ntu_gongguan()
                     elif text == '萬華區':
                         message = random.choice(keywords['words'])
                         sendText(message, event)
-                        send_data = wanhua()
-                    ai(text, event, line_bot_api)
+                        wanhua()
+                    else:
+                        ai(text, event, line_bot_api)
 
                 else:
                     sendText('無法辨識！', event)
@@ -149,10 +152,10 @@ def analyze_area_data():
     api_url = 'https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json'
     df = pd.read_json(api_url)
     df1 = df[df['act'] == 1]
-    columns = 'mday sarea sna ar lat lng tot sbi bemp'.split()
+    columns = 'sarea sna ar lat lng tot sbi bemp mday'.split()
     ubike_data = df1[columns]
     ubike_data = ubike_data.rename(columns={
-                                   'mday': '更新時間', 'sarea': '區域', 'tot': '總車位數', 'sbi': '目前車輛數量', 'bemp': '空位數量'})
+                                   'sarea': '區域', 'tot': '總車位數', 'sbi': '目前車輛數量', 'bemp': '空位數量', 'mday': '更新時間'})
 
     ubike_data = ubike_data.sort_values('目前車輛數量', ascending=False)
     datas = ubike_data.values.tolist()
@@ -160,19 +163,21 @@ def analyze_area_data():
 
 
 def get_data(datas, name, area_dict):
+    global send_data
     for i in datas:
-        if name in i[1]:
-            area_dict[i[2]] = i[3:]
+        if name in i[0]:
+            area_dict[i[1]] = i[2:]
     send_data = []
     for i in area_dict.items():
         title = i[0]
         ar = i[1][0]
         lat = i[1][1]
         lng = i[1][2]
-        have_ubike = str(i[1][-2])
-        empty = str(i[1][-1])
+        have_ubike = str(i[1][-3])
+        empty = str(i[1][-2])
+        updatetime = i[1][-1]
         # print(title,ar,lat,lng)
-        send_data.append([title, ar, lat, lng, have_ubike, empty])
+        send_data.append([title, ar, lat, lng, have_ubike, empty, updatetime])
     return send_data
 
 
@@ -291,37 +296,32 @@ def wanhua():
 def ai(text, event, line_bot_api):
     try:
         if send_data is not None or send_data != []:
-            print(text)
+            # print(text)
             data2 = [data for data in send_data if text in data[0]
                      or text in data[1]]
-            if len(data2) == 1:
+            if len(data2) == 0:
+                messages = (TextSendMessage('您所找的地方/景點未搜尋到，請確認後再重新輸入！'))
+            elif len(data2) == 1:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
             elif len(data2) == 2:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
-                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}')
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'更新時間：{data2[1][6]} 目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}')
             elif len(data2) == 3:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
-                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}'), LocationSendMessage(
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'更新時間：{data2[1][6]} 目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}'), LocationSendMessage(
                     data2[2][0], data2[2][1], data2[2][2], data2[2][3])
-            elif len(data2) == 4:
+            elif len(data2) >= 4:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'更新時間：{data2[0][6]} 目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
                     data2[1][0], data2[1][1], data2[1][2], data2[1][3]), LocationSendMessage(
                     data2[2][0], data2[2][1], data2[2][2], data2[2][3]), LocationSendMessage(
                     data2[3][0], data2[3][1], data2[3][2], data2[3][3])
-            elif len(data2) >= 5:
-                messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), LocationSendMessage(
-                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), LocationSendMessage(
-                    data2[2][0], data2[2][1], data2[2][2], data2[2][3]), LocationSendMessage(
-                    data2[3][0], data2[3][1], data2[3][2], data2[3][3]), LocationSendMessage(
-                    data2[4][0], data2[4][1], data2[4][2], data2[4][3])
             line_bot_api.reply_message(event.reply_token, messages)
             return
     except:
         message = TextSendMessage(
-            text='請注意地址是否正確唷，例如: "臺"跟"台"的差別，再請您試一次，拜託～～～～')
+            text='請注意地址/景點是否正確唷，例如: "臺"跟"台"的差別，也請您從區域開始查找，再請您試一次，拜託～～～～')
         line_bot_api.reply_message(event.reply_token, message)
