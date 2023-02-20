@@ -49,72 +49,72 @@ def callback(request):
                                     for text in keywords['area']]
                         line_bot_api.reply_message(event.reply_token, messages)
                     elif text == '中山區':
-                        send_data = zhongshan()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '中正區':
-                        send_data = zhongzheng()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '信義區':
-                        send_data = xinyi()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '內湖區':
-                        send_data = neihu()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '北投區':
-                        send_data = beitou()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '南港區':
-                        send_data = nangang()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '士林區':
-                        send_data = shilin()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '大同區':
-                        send_data = datong()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '大安區':
-                        send_data = daan()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '文山區':
-                        send_data = wenshan()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '松山區':
-                        send_data = songshan()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif '臺大專區' in text or '台大專區' in text or text == '臺大專區':
-                        send_data = ntu()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif '臺大公館校區' in text or '公館校區' in text:
-                        send_data = ntu_gongguan()
+                        send_data = get_area(text)
                         messages = LocationSendMessage(
                             send_data[0][0], send_data[0][1], send_data[0][2], send_data[0][3]), TextSendMessage(f'更新時間：{send_data[0][6]} 目前車輛數量：{send_data[0][4]} 空位數量：{send_data[0][5]}')
                         line_bot_api.reply_message(event.reply_token, messages)
                     elif text == '萬華區':
-                        send_data = wanhua()
+                        send_data = get_area(text)
                         message = random.choice(keywords['words'])
                         sendText(
                             f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
@@ -199,114 +199,10 @@ def get_data(datas, name, area_dict):
     return send_data
 
 
-def zhongshan():
+def get_area(text):
     datas = analyze_area_data()
     area_dict = {}
-    name = '中山'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def zhongzheng():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '中正'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def xinyi():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '信義'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def neihu():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '內湖'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def beitou():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '北投'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def nangang():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '南港'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def shilin():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '士林'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def datong():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '大同'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def daan():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '大安'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def wenshan():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '文山'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def songshan():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '松山'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def ntu_gongguan():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '臺大公館'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def ntu():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '臺大專區'
-    send_data = get_data(datas, name, area_dict)
-    return send_data
-
-
-def wanhua():
-    datas = analyze_area_data()
-    area_dict = {}
-    name = '萬華'
+    name = text
     send_data = get_data(datas, name, area_dict)
     return send_data
 
