@@ -330,7 +330,7 @@ def ai(text, event, line_bot_api):
                 data3 = [
                     f'*您所查詢的: {text} 共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']
                 for i in data2:
-                    data3.append(i[0] + '\n' + ' 目前車輛數量為 :' +
+                    data3.append(i[0] + '\n' + '目前車輛數量為 :' +
                                  str(i[-3]) + ' 空位數量為 : ' + str(i[-2]))
                 messages = TextSendMessage('\n\n'.join(data3))
             line_bot_api.reply_message(event.reply_token, messages)
