@@ -23,7 +23,7 @@ def index(requests):
 @csrf_exempt
 def callback(request):
     keywords = {'words': ['哪條街或周邊景點呢？', '再請您輸入地址or景點！！',
-                          '越詳細地址越好唷，前面不用加台北市唷～', '快給我其他資訊!要不然怎麼幫你找？？？', '今天想要減肥嗎，給我更我多資訊幫你找哪裡有ubike唷！！'],
+                          '越詳細地址越好唷，前面不用加台北市唷～', '快給我其他資訊!要不然怎麼幫你找???', '今天想要減肥嗎，給我更我多資訊幫你找哪裡有ubike唷！！'],
                 'area': [
                     '中山區，中正區，信義區，內湖區，\n北投區，南港區，士林區，大同區，\n大安區，文山區，松山區，臺大公館校區，\n臺大專區，萬華區', '想要找哪個區域呢？？']
                 }
@@ -43,68 +43,81 @@ def callback(request):
                     text = event.message.text
                     if '使用' in text or '說明' in text:
                         sendText(
-                            '歡迎使用ubike bot！\n查找規則:\n欲查找站點請先輸入區域(輸入區域即可查看)，不需要打"台北市" ，再輸入欲查找站點即可查詢\n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n完感謝您的使用！！', event)
+                            '歡迎使用ubike bot！\n查找規則:\n欲查找站點請先輸入區域(輸入區域即可查看)，不需要打"台北市" ，再輸入欲查找站點即可查詢\n完感謝您的使用！！', event)
                     elif '區域' in text:
                         messages = [TextSendMessage(text)
                                     for text in keywords['area']]
                         line_bot_api.reply_message(event.reply_token, messages)
                     elif text == '中山區':
+                        send_data = zhongshan()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        zhongshan()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '中正區':
+                        send_data = zhongzheng()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        zhongzheng()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '信義區':
+                        send_data = xinyi()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        xinyi()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '內湖區':
+                        send_data = neihu()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        neihu()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '北投區':
+                        send_data = beitou()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        beitou()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '南港區':
+                        send_data = nangang()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        nangang()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '士林區':
+                        send_data = shilin()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        shilin()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '大同區':
+                        send_data = datong()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        datong()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '大安區':
+                        send_data = daan()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        daan()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '文山區':
+                        send_data = wenshan()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        wenshan()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif text == '松山區':
+                        send_data = songshan()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        songshan()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif '臺大專區' in text or '台大專區' in text or text == '臺大專區':
+                        send_data = ntu()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        ntu()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     elif '臺大公館校區' in text or '公館校區' in text:
                         send_data = ntu_gongguan()
                         messages = LocationSendMessage(
                             send_data[0][0], send_data[0][1], send_data[0][2], send_data[0][3]), TextSendMessage(f'更新時間：{send_data[0][6]} 目前車輛數量：{send_data[0][4]} 空位數量：{send_data[0][5]}')
                         line_bot_api.reply_message(event.reply_token, messages)
                     elif text == '萬華區':
+                        send_data = wanhua()
                         message = random.choice(keywords['words'])
-                        sendText(message, event)
-                        wanhua()
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
                     else:
                         ai(text, event, line_bot_api)
 
@@ -324,5 +337,5 @@ def ai(text, event, line_bot_api):
             return
     except:
         message = TextSendMessage(
-            text='請注意地址/景點是否正確唷，例如: "臺"跟"台"的差別，也請您從區域開始查找，再請您試一次，拜託～～～～')
+            text='請注意地址/景點是否正確唷，例如: "臺"跟"台"的差別\n也請您從區域開始查找(不確定區域有哪些的話可以輸入區域查找\n再請您試一次，拜託～～～～')
         line_bot_api.reply_message(event.reply_token, message)
