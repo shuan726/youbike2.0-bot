@@ -142,20 +142,20 @@ def get_location(address, lat, lng, event, line_bot_api):
     for data in datas:
         point1 = (lat, lng)
         point2 = (data[3], data[4])
-        if haversine(point1, point2, unit=Unit.METERS) <= 500:
-            result = haversine(point1, point2, unit=Unit.METERS)
+        result = haversine(point1, point2, unit=Unit.METERS)
+        if result <= 500:
             send_data.append([data[1], data[2], data[3],
-                             data[4], data[5], data[7], data[8], result])
+                             data[4], data[5], data[7], data[8], round(result, 1)])
     data2 = [data for data in send_data]
     if len(data2) == 0:
         messages = (TextSendMessage('您所定位的位置周圍500公尺都沒有站點唷，麻煩你用走路的，謝謝！'))
     elif len(data2) == 1:
         messages = LocationSendMessage(
-            data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{round(data2[0][6],1)}公尺')
+            data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{data2[0][-1]}公尺')
     elif len(data2) == 2:
         messages = LocationSendMessage(
-            data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{round(data2[0][6],1)}公尺'), LocationSendMessage(
-            data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n 更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}\n距離您的定位：{round(data2[0][6],1)}公尺')
+            data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{data2[0][-1]}公尺'), LocationSendMessage(
+            data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}\n距離您的定位：{data2[1][-1]}公尺')
     else:
         data3 = [
             f'*您附近 共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']
@@ -200,18 +200,17 @@ def get_area(text, new_taipei=False):
 def ai(text, event, line_bot_api):
     try:
         if send_data is not None or send_data != []:
-            print(text)
             data2 = [data for data in send_data if text in data[0]
                      or text in data[1]]
             if len(data2) == 0:
                 messages = (TextSendMessage('您所找的地方/景點未搜尋到此站點名稱，請確認後再重新輸入！'))
             elif len(data2) == 1:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
             elif len(data2) == 2:
                 messages = LocationSendMessage(
-                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
-                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n 更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}')
+                    data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}'), LocationSendMessage(
+                    data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}')
             else:
                 data3 = [
                     f'*您所查詢的: {text} 共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']

@@ -1,0 +1,4 @@
+Django==4.1
+haversine==2.7.0
+line_bot_sdk==2.4.1
+pandas==1.5.3
