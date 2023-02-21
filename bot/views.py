@@ -148,7 +148,7 @@ def get_location(address, lat, lng, event, line_bot_api):
                              data[4], data[5], data[7], data[8], result])
     data2 = [data for data in send_data]
     if len(data2) == 0:
-        messages = (TextSendMessage('您所找的地方/景點未搜尋到此站點名稱，請確認後再重新輸入！'))
+        messages = (TextSendMessage('您所定位的位置周圍500公尺都沒有站點唷，麻煩你用走路的，謝謝！'))
     elif len(data2) == 1:
         messages = LocationSendMessage(
             data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{round(data2[0][6],1)}公尺')
