@@ -5,11 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 import pandas as pd
 import random
+from haversine import haversine, Unit
 # Create your views here.
 
 from linebot import LineBotApi, WebhookHandler, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextSendMessage, TextMessage, LocationSendMessage
+from linebot.models import MessageEvent, TextSendMessage, TextMessage, LocationSendMessage, LocationMessage
 
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
@@ -45,7 +46,7 @@ def callback(request):
                     text = event.message.text
                     if '使用' in text or '說明' in text:
                         sendText(
-                            '歡迎使用ubike bot！\n查找規則:\n欲查找站點請先輸入區域\n(輸入台北 或 新北 即可查看) \n，再輸入欲查找站點即可查詢\n完感謝您的使用！！', event)
+                            '歡迎使用ubike bot！\n查找規則:\n欲查找站點請先輸入區域(如：信義區)\n可輸入附近，並傳送個人位置訊息\n或(輸入台北 或 新北 即可查看) \n，再輸入欲查找站點即可查詢\n完感謝您的使用！！', event)
                     elif text == '台北市' or text == '臺北市' or text == '臺北' or text == '台北':
                         messages = [TextSendMessage(text)
                                     for text in keywords['台北市']]
@@ -59,7 +60,7 @@ def callback(request):
                         send_data = get_area(text, new_taipei=True)
                         message = random.choice(keywords['words'])
                         sendText(
-                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可輸入附近，傳送個人位置 或 輸入 "街" or "路"查詢 \n{message}', event)
 
                     elif text in keywords['台北市'][0].replace(
                             '\n', '').replace('，', ','):
@@ -73,10 +74,19 @@ def callback(request):
                             send_data = get_area(text)
                             message = random.choice(keywords['words'])
                             sendText(
-                                f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可以在輸入完區域後再輸入 "街" or "路" \n{message}', event)
+                                f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可輸入附近，傳送個人位置 或 輸入 "街" or "路"查詢 \n{message}', event)
+                    elif '附近' in text:
+                        message = '請先發送個人位置訊息'
+                        sendText(message, event)
 
                     else:
                         ai(text, event, line_bot_api)
+                elif isinstance(event.message, LocationMessage):
+                    address = event.message.address
+                    lat = event.message.latitude
+                    lng = event.message.longitude
+                    send_data = get_location(
+                        address, lat, lng, event, line_bot_api)
 
                 else:
                     sendText('無法辨識！', event)
@@ -123,6 +133,40 @@ def analyze_area_data(new_taipei_area=False):
     return datas
 
 
+def get_location(address, lat, lng, event, line_bot_api):
+    if '新北市' in address:
+        datas = analyze_area_data(new_taipei_area=True)
+    else:
+        datas = analyze_area_data(new_taipei_area=False)
+    send_data = []
+    for data in datas:
+        point1 = (lat, lng)
+        point2 = (data[3], data[4])
+        if haversine(point1, point2, unit=Unit.METERS) <= 500:
+            result = haversine(point1, point2, unit=Unit.METERS)
+            send_data.append([data[1], data[2], data[3],
+                             data[4], data[5], data[7], data[8], result])
+    data2 = [data for data in send_data]
+    if len(data2) == 0:
+        messages = (TextSendMessage('您所找的地方/景點未搜尋到此站點名稱，請確認後再重新輸入！'))
+    elif len(data2) == 1:
+        messages = LocationSendMessage(
+            data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{round(data2[0][6],1)}公尺')
+    elif len(data2) == 2:
+        messages = LocationSendMessage(
+            data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n 更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{round(data2[0][6],1)}公尺'), LocationSendMessage(
+            data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n 更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}\n距離您的定位：{round(data2[0][6],1)}公尺')
+    else:
+        data3 = [
+            f'*您附近 共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']
+        for i in data2:
+            data3.append(i[0] + '\n' + '目前車輛數量為 :' +
+                         str(i[-4]) + ' 空位數量為 : ' + str(i[-3]) + '\n' + '距離您的定位：' + str(round(i[-1], 1))+'公尺')
+        messages = TextSendMessage('\n\n'.join(data3))
+    line_bot_api.reply_message(event.reply_token, messages)
+    return
+
+
 def get_data(datas, name, area_dict):
     global send_data
     for i in datas:
@@ -156,7 +200,7 @@ def get_area(text, new_taipei=False):
 def ai(text, event, line_bot_api):
     try:
         if send_data is not None or send_data != []:
-            # print(text)
+            print(text)
             data2 = [data for data in send_data if text in data[0]
                      or text in data[1]]
             if len(data2) == 0:
