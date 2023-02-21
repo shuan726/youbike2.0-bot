@@ -46,7 +46,7 @@ def callback(request):
                     text = event.message.text
                     if '使用' in text or '說明' in text:
                         sendText(
-                            '歡迎使用ubike bot！\n查找規則:\n欲查找站點請先輸入區域(如：信義區)\n可輸入附近，並傳送個人位置訊息\n或(輸入台北 或 新北 即可查看) \n，再輸入欲查找站點即可查詢\n完感謝您的使用！！', event)
+                            '歡迎使用ubike bot！\n查找規則:\n可輸入附近，並傳送個人位置訊息\n欲查找站點請先輸入區域(如：台北 或 新北)\n即可查看詳細行政區， \n再輸入欲查找行政區即可查詢，\n完感謝您的使用！！', event)
                     elif text == '台北市' or text == '臺北市' or text == '臺北' or text == '台北':
                         messages = [TextSendMessage(text)
                                     for text in keywords['台北市']]
