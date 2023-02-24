@@ -23,8 +23,8 @@ def index(requests):
 
 @csrf_exempt
 def callback(request):
-    keywords = {'words': ['哪條街或周邊景點呢？', '再請您輸入地址or景點！！',
-                          '越詳細地址越好唷，前面不用加台北市唷～', '快給我其他資訊!要不然怎麼幫你找???', '今天想要減肥嗎，給我更我多資訊幫你找哪裡有ubike唷！！'],
+    keywords = {'words': ['哪條街或周邊景點呢？', '請您輸入地址or景點！！',
+                          '越詳細地址越好唷，不知道在哪也可以傳送個人位置資訊喔～', '快給我其他資訊!要不然怎麼幫你找???', '今天想要減肥嗎，給我更我多資訊幫你找哪裡有ubike！！'],
                 '台北市': [
                     '中山區，中正區，信義區，內湖區，\n北投區，南港區，士林區，大同區，\n大安區，文山區，松山區，臺大公館校區，\n臺大專區，萬華區', '想要找哪個區域呢？？'],
                 '新北市': [
@@ -146,6 +146,7 @@ def get_location(address, lat, lng, event, line_bot_api):
         if result <= 500:
             send_data.append([data[1], data[2], data[3],
                              data[4], data[5], data[7], data[8], round(result, 1)])
+    send_data = sorted(send_data, key=lambda x: x[-1])
     data2 = [data for data in send_data]
     if len(data2) == 0:
         messages = (TextSendMessage('您所定位的位置周圍500公尺都沒有站點唷，麻煩你用走路的，謝謝！'))
