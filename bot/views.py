@@ -134,6 +134,7 @@ def analyze_area_data(new_taipei_area=False):
 
 
 def get_location(address, lat, lng, event, line_bot_api):
+    global send_data
     if '新北市' in address:
         datas = analyze_area_data(new_taipei_area=True)
     else:
@@ -145,7 +146,7 @@ def get_location(address, lat, lng, event, line_bot_api):
         result = haversine(point1, point2, unit=Unit.METERS)
         if result <= 500:
             send_data.append([data[1], data[2], data[3],
-                             data[4], data[5], data[7], data[8], round(result, 1)])
+                             data[4], data[6], data[7], data[8], round(result, 1)])
     send_data = sorted(send_data, key=lambda x: x[-1])
     data2 = [data for data in send_data]
     if len(data2) == 0:
@@ -165,7 +166,7 @@ def get_location(address, lat, lng, event, line_bot_api):
                          str(i[-4]) + ' 空位數量為 : ' + str(i[-3]) + '\n' + '距離您的定位：' + str(round(i[-1], 1))+'公尺')
         messages = TextSendMessage('\n\n'.join(data3))
     line_bot_api.reply_message(event.reply_token, messages)
-    return
+    return send_data
 
 
 def get_data(datas, name, area_dict):
@@ -204,7 +205,7 @@ def ai(text, event, line_bot_api):
             data2 = [data for data in send_data if text in data[0]
                      or text in data[1]]
             if len(data2) == 0:
-                messages = (TextSendMessage('您所找的地方/景點未搜尋到此站點名稱，請確認後再重新輸入！'))
+                messages = (TextSendMessage('您所找的區域未搜尋到此站點名稱，請確認後再重新輸入！'))
             elif len(data2) == 1:
                 messages = LocationSendMessage(
                     data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}')
@@ -221,7 +222,8 @@ def ai(text, event, line_bot_api):
                 messages = TextSendMessage('\n\n'.join(data3))
             line_bot_api.reply_message(event.reply_token, messages)
             return
-    except:
+    except Exception as e:
+        print(e)
         message = TextSendMessage(
             text='請注意地址/景點是否正確唷，例如: "臺"跟"台"的差別\n也請您從區域開始查找(不確定區域有哪些的話可以輸入區域查找\n再請您試一次，拜託～～～～')
         line_bot_api.reply_message(event.reply_token, message)
