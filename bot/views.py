@@ -82,12 +82,12 @@ def callback(request):
                     else:
                         ai(text, event, line_bot_api)
                 elif isinstance(event.message, LocationMessage):
+                    title = event.message.title
                     address = event.message.address
                     lat = event.message.latitude
                     lng = event.message.longitude
                     send_data = get_location(
-                        address, lat, lng, event, line_bot_api)
-
+                        title, address, lat, lng, event, line_bot_api)
                 else:
                     sendText('無法辨識！', event)
 
@@ -133,7 +133,7 @@ def analyze_area_data(new_taipei_area=False):
     return datas
 
 
-def get_location(address, lat, lng, event, line_bot_api):
+def get_location(title, address, lat, lng, event, line_bot_api):
     global send_data
     if '新北市' in address:
         datas = analyze_area_data(new_taipei_area=True)
@@ -159,8 +159,12 @@ def get_location(address, lat, lng, event, line_bot_api):
             data2[0][0], data2[0][1], data2[0][2], data2[0][3]), TextSendMessage(f'{data2[0][0]}\n更新時間：{data2[0][6]} \n目前車輛數量：{data2[0][4]} 空位數量：{data2[0][5]}\n距離您的定位：{data2[0][-1]}公尺'), LocationSendMessage(
             data2[1][0], data2[1][1], data2[1][2], data2[1][3]), TextSendMessage(f'{data2[1][0]}\n更新時間：{data2[1][6]} \n目前車輛數量：{data2[1][4]} 空位數量：{data2[1][5]}\n距離您的定位：{data2[1][-1]}公尺')
     else:
-        data3 = [
-            f'*您附近 共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']
+        if title is not None:
+            data3 = [
+                f'*您所查詢的地點\n{title} 附近\n共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']
+        else:
+            data3 = [
+                f'*您附近 共有{len(data2)}個站點', f'*欲想查詢地圖位置，可輸入該站點名稱(如:{data2[0][0][11:]}，{data2[1][0][11:]}...)！！']
         for i in data2:
             data3.append(i[0] + '\n' + '目前車輛數量為 :' +
                          str(i[-4]) + ' 空位數量為 : ' + str(i[-3]) + '\n' + '距離您的定位：' + str(round(i[-1], 1))+'公尺')
