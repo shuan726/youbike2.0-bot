@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import random
 from haversine import haversine, Unit
+import requests
 # Create your views here.
 
 from linebot import LineBotApi, WebhookHandler, WebhookParser
@@ -28,7 +29,9 @@ def callback(request):
                 '台北市': [
                     '中山區，中正區，信義區，內湖區，\n北投區，南港區，士林區，大同區，\n大安區，文山區，松山區，臺大公館校區，\n臺大專區，萬華區', '想要找哪個區域呢？？'],
                 '新北市': [
-                    '瑞芳區，三芝區，金山區，深坑區，\n三峽區，鶯歌區，淡水區，永和區，\n泰山區，板橋區，中和區，樹林區，\n萬里區，五股區，八里區，汐止區，\n石門區，石碇區，土城區，新莊區，\n三重區，坪林區，新店區，蘆洲區，\n林口區，猴雙公共自行車專區', '想要找哪個區域呢？？']
+                    '瑞芳區，三芝區，金山區，深坑區，\n三峽區，鶯歌區，淡水區，永和區，\n泰山區，板橋區，中和區，樹林區，\n萬里區，五股區，八里區，汐止區，\n石門區，石碇區，土城區，新莊區，\n三重區，坪林區，新店區，蘆洲區，\n林口區，猴雙公共自行車專區', '想要找哪個區域呢？？'],
+                '台中市': [
+                    '潭子區，東區，中區，后里區，\n石岡區，西屯區，北區，南屯區，\n神岡區，大安區，豐原區，外埔區，\n南區，大里區，和平區，烏日區，\n霧峰區，大雅區，東勢區，太平區，\n清水區，北屯區，大甲區，沙鹿區，\n大肚區，梧棲區，新社區，西區，\n龍井區', '想要找哪個區域呢？？']
                 }
 
     if request.method == 'POST':
@@ -55,6 +58,10 @@ def callback(request):
                         messages = [TextSendMessage(text)
                                     for text in keywords['新北市']]
                         line_bot_api.reply_message(event.reply_token, messages)
+                    elif text == '台中市' or text == '臺中市' or text == '臺中' or text == '台中':
+                        messages = [TextSendMessage(text)
+                                    for text in keywords['台中市']]
+                        line_bot_api.reply_message(event.reply_token, messages)
                     elif text in keywords['新北市'][0].replace(
                             '\n', '').replace('，', ','):
                         send_data = get_area(text, new_taipei=True)
@@ -75,6 +82,12 @@ def callback(request):
                             message = random.choice(keywords['words'])
                             sendText(
                                 f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可輸入附近，傳送個人位置 或 輸入 "街" or "路"查詢 \n{message}', event)
+                    elif text in keywords['台中市'][0].replace(
+                            '\n', '').replace('，', ','):
+                        send_data = get_area(text, taichung=True)
+                        message = random.choice(keywords['words'])
+                        sendText(
+                            f'{text}共有 {len(send_data)} 個站點 \n如不確定是在哪裡，可輸入附近，傳送個人位置 或 輸入 "街" or "路"查詢 \n{message}', event)
                     elif '附近' in text:
                         message = '請先發送個人位置訊息'
                         sendText(message, event)
@@ -113,18 +126,26 @@ def sendLocation(sna, ar, lat, lng, event):
             event.reply_token, TextSendMessage(text='傳送失敗!'))
 
 
-def analyze_area_data(new_taipei_area=False):
-    if new_taipei_area:
+def analyze_area_data(new_taipei_area=False, taichung_area=False):
+    if new_taipei_area == True and taichung_area == False:
         api_url = 'https://data.ntpc.gov.tw/api/datasets/010E5B15-3823-4B20-B401-B1CF000550C5/json?page=0&size=1000'
-    else:
+        df = pd.read_json(api_url)
+        df1 = df[df['act'] == 1]
+    elif new_taipei_area == False and taichung_area == False:
         api_url = 'https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json'
-    df = pd.read_json(api_url)
-    df1 = df[df['act'] == 1]
+        df = pd.read_json(api_url)
+        df1 = df[df['act'] == 1]
+    elif new_taipei_area == False and taichung_area == True:
+        api_url = 'https://datacenter.taichung.gov.tw/swagger/OpenData/9af00e84-473a-4f3d-99be-b875d8e86256'
+        datas = requests.get(api_url).json()
+        df = pd.DataFrame(datas['retVal'])
+        df1 = df[df['act'] == 1]
+
     columns = 'sarea sna ar lat lng tot sbi bemp mday'.split()
     ubike_data = df1[columns]
     ubike_data = ubike_data.rename(columns={
                                    'sarea': '區域', 'tot': '總車位數', 'sbi': '目前車輛數量', 'bemp': '空位數量', 'mday': '更新時間'})
-    if new_taipei_area:
+    if new_taipei_area or taichung_area:
         ubike_data['更新時間'] = ubike_data['更新時間'].apply(lambda x: (str(x)))
         ubike_data['更新時間'] = ubike_data['更新時間'].astype(
             'datetime64[ns]').astype(str)
@@ -136,13 +157,15 @@ def analyze_area_data(new_taipei_area=False):
 def get_location(title, address, lat, lng, event, line_bot_api):
     global send_data
     if '新北市' in address:
-        datas = analyze_area_data(new_taipei_area=True)
+        datas = analyze_area_data(new_taipei_area=True, taichung_area=False)
+    elif '台中市' in address:
+        datas = analyze_area_data(new_taipei_area=False, taichung_area=True)
     else:
-        datas = analyze_area_data(new_taipei_area=False)
+        datas = analyze_area_data(new_taipei_area=False, taichung_area=False)
     send_data = []
     for data in datas:
         point1 = (lat, lng)
-        point2 = (data[3], data[4])
+        point2 = (float(data[3]), float(data[4]))
         result = haversine(point1, point2, unit=Unit.METERS)
         if result <= 500:
             send_data.append([data[1], data[2], data[3],
@@ -192,9 +215,11 @@ def get_data(datas, name, area_dict):
     return send_data
 
 
-def get_area(text, new_taipei=False):
-    if new_taipei:
-        datas = analyze_area_data(new_taipei_area=True)
+def get_area(text, new_taipei=False, taichung=False):
+    if new_taipei == True and taichung == False:
+        datas = analyze_area_data(new_taipei_area=True, taichung_area=False)
+    elif taichung == True and new_taipei == False:
+        datas = analyze_area_data(new_taipei_area=False, taichung_area=True)
     else:
         datas = analyze_area_data()
     area_dict = {}
